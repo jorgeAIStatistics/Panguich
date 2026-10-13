@@ -1,0 +1,47 @@
+import { count, sql } from "drizzle-orm";
+import type { Role } from "@/lib/auth/permissions";
+import type { Locale } from "@/lib/i18n";
+import { seedCatering } from "@/modules/catering/seed";
+import { seedGrowth } from "@/modules/growth/seed";
+import { seedOperations } from "@/modules/operations/seed";
+import type { Db } from "./client";
+import { users } from "./schema";
+
+/**
+ * Demo identities. They are placeholders, not real people, and are flagged is_demo so
+ * nothing they do can ever reach a live send, payment, or external system.
+ */
+export const DEMO_USERS: ReadonlyArray<{ id: string; name: string; role: Role; locale: Locale; isDemo: true }> = [
+  { id: "demo-owner", name: "Demo Owner", role: "owner", locale: "es", isDemo: true },
+  { id: "demo-manager", name: "Demo Manager", role: "manager", locale: "en", isDemo: true },
+  { id: "demo-staff", name: "Demo Staff", role: "staff", locale: "es", isDemo: true },
+];
+
+/** Inserts demo identities and clearly labeled sample records into an empty database. */
+export async function seedDemoData(db: Db): Promise<{ seeded: boolean }> {
+  const [{ value: existing }] = await db.select({ value: count() }).from(users);
+  if (existing > 0) return { seeded: false };
+
+  await db.insert(users).values(DEMO_USERS.map((u) => ({ ...u })));
+  await seedCatering(db);
+  await seedGrowth(db);
+  await seedOperations(db);
+  return { seeded: true };
+}
+
+/**
+ * Demo only: erases everything entered in this workspace (keeping the demo identities) and
+ * puts the labeled sample records back. Never call this against a database with real records.
+ */
+export async function resetDemoData(db: Db): Promise<void> {
+  const tables = await db.execute<{ tablename: string }>(
+    sql`select tablename from pg_tables where schemaname = 'public' and tablename <> 'users'`,
+  );
+  const names = tables.rows.map((row) => `"${row.tablename.replace(/"/g, "")}"`);
+  if (names.length > 0) {
+    await db.execute(sql.raw(`truncate table ${names.join(", ")} restart identity cascade`));
+  }
+  await seedCatering(db);
+  await seedGrowth(db);
+  await seedOperations(db);
+}
