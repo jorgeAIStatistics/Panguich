@@ -6,13 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint src e2e scripts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:reset": "node scripts/reset-demo-db.mjs",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run build"
+    "check": "npm run typecheck && npm run lint && npm run test && npm run test:e2e",
+    "demo": "PANGUICH_DEMO_MODE=1 next build && PANGUICH_DEMO_MODE=1 next start",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.9",

@@ -1,4 +1,4 @@
-import { count } from "drizzle-orm";
+import { count, sql } from "drizzle-orm";
 import type { Role } from "@/lib/auth/permissions";
 import type { Locale } from "@/lib/i18n";
 import { seedCatering } from "@/modules/catering/seed";
@@ -27,4 +27,21 @@ export async function seedDemoData(db: Db): Promise<{ seeded: boolean }> {
   await seedGrowth(db);
   await seedOperations(db);
   return { seeded: true };
+}
+
+/**
+ * Demo only: erases everything entered in this workspace (keeping the demo identities) and
+ * puts the labeled sample records back. Never call this against a database with real records.
+ */
+export async function resetDemoData(db: Db): Promise<void> {
+  const tables = await db.execute<{ tablename: string }>(
+    sql`select tablename from pg_tables where schemaname = 'public' and tablename <> 'users'`,
+  );
+  const names = tables.rows.map((row) => `"${row.tablename.replace(/"/g, "")}"`);
+  if (names.length > 0) {
+    await db.execute(sql.raw(`truncate table ${names.join(", ")} restart identity cascade`));
+  }
+  await seedCatering(db);
+  await seedGrowth(db);
+  await seedOperations(db);
 }

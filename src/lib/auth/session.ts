@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { dataDir, getDb } from "@/db/client";
 import { users } from "@/db/schema";
 import { writeAudit, type Actor } from "@/lib/audit";
+import { isDemoMode } from "@/lib/demo";
 import type { Locale } from "@/lib/i18n";
 import { can, type Permission, type Role } from "./permissions";
 import { signSession, verifySession } from "./token";
@@ -16,16 +17,7 @@ const SESSION_HOURS = 12;
 
 export type SessionUser = { id: string; name: string; role: Role; locale: Locale; isDemo: boolean };
 
-/**
- * Demo mode turns on the pick-a-role sign-in. It is on in local development and off in a
- * production build unless PANGUICH_DEMO_MODE=1 is set deliberately.
- */
-export function isDemoMode(): boolean {
-  const flag = process.env.PANGUICH_DEMO_MODE;
-  if (flag === "1") return true;
-  if (flag === "0") return false;
-  return process.env.NODE_ENV !== "production";
-}
+export { isDemoMode };
 
 let cachedSecret: string | undefined;
 

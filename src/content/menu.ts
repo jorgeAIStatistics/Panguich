@@ -1,4 +1,5 @@
 import type { Bilingual } from "@/lib/i18n";
+import { normalizeForSearch } from "@/lib/text";
 import type { SourceId } from "./business";
 
 /**
@@ -250,17 +251,6 @@ export function itemsInCategory(categoryId: string): MenuItem[] {
 /** The three items the restaurant itself features on its Toast page. */
 export function featuredItems(): MenuItem[] {
   return MENU_ITEMS.filter((item) => item.featuredOnToast);
-}
-
-/** Lower-cases and strips accents so "chicharron" finds "Chicharrón". */
-export function normalizeForSearch(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9/ ]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 /** Every word typed must appear in the item's name, description (either language) or category. */
