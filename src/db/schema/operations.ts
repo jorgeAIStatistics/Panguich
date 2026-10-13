@@ -90,14 +90,22 @@ export const EXCEPTION_STATUSES = [
 ] as const;
 export type ExceptionStatus = (typeof EXCEPTION_STATUSES)[number];
 
-/** Evidence stored with an exception so every number can be traced back to invoice lines. */
+/**
+ * Evidence stored with an exception so every number can be traced back to invoice lines.
+ * All text here is written by deterministic code from the stored numbers, in both languages,
+ * at detection time. Nothing in it is copied from the free text of a document.
+ */
 export type ExceptionEvidence = {
   lineIds: string[];
   invoiceIds: string[];
+  /** The invoice line in question (the newer purchase), so the interface can highlight it. */
+  flaggedLineId: string | null;
+  /** One plain-words sentence saying what was noticed. */
+  summary: Bilingual;
   /** Step-by-step arithmetic in plain values, produced by deterministic code. */
-  calculation: Array<{ label: string; value: string }>;
+  calculation: Array<{ label: Bilingual; value: Bilingual }>;
   /** What could make this conclusion wrong. */
-  caveats: string[];
+  caveats: Bilingual[];
 };
 
 export const financialExceptions = pgTable(

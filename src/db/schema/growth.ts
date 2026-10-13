@@ -22,7 +22,8 @@ export type CampaignOffer =
       description: string;
       eligibleItemIds: string[];
       exclusions: string;
-      quantityLimit: number | null;
+      /** A whole number, the explicit choice "no_limit", or null when not stated yet (incomplete). */
+      quantityLimit: number | "no_limit" | null;
       redemptionControl: string;
       /** Owner-entered assumption; null means unknown and must be shown as missing. */
       contributionMarginNote: string | null;

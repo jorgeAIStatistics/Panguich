@@ -70,6 +70,20 @@ test.describe("owner workspace access", () => {
   });
 });
 
+test("each person's saved language is used when this device has no choice yet", async ({ browser }) => {
+  // No language cookie at all: the sign-in page links to the English site, and the browser
+  // fetching that link in the background must not turn the Spanish-speaking owner's screen English.
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto("/owner/sign-in");
+  await page.waitForLoadState("networkidle");
+  await page.locator('form:has(input[name="userId"][value="demo-owner"]) button[type="submit"]').click();
+  await page.waitForURL(/\/owner$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Hoy" })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("lang", "es");
+  await context.close();
+});
+
 test.describe("settings", () => {
   test("no connection is shown as connected", async ({ page }) => {
     await signInAs(page, "owner");

@@ -11,6 +11,8 @@ test("a campaign is drafted by a manager, approved only by the owner, and goes s
   await page.goto("/owner/grow");
   // No sales claims: orders and revenue are shown as missing, not as zero or as taps.
   await expect(page.getByTestId("orders-missing")).toBeVisible();
+  // Stated up front: nothing is published, sent or spent from this screen.
+  await expect(page.getByTestId("grow-nothing-leaves")).toBeVisible();
 
   await page.getByTestId("grow-start-weekday_lunch").getByRole("button").click();
   await page.waitForURL(/\/owner\/grow\/[^/]+$/);
@@ -23,10 +25,10 @@ test("a campaign is drafted by a manager, approved only by the owner, and goes s
   const channels = preview.getByTestId("channel-state");
   expect(await channels.count()).toBeGreaterThan(0);
   for (const channel of await channels.all()) {
-    await expect(channel).toHaveAttribute("data-state", "not_configured");
+    await expect(channel).toHaveAttribute("data-state", "not_connected_export_only");
+    await expect(channel).toContainText("Not connected");
   }
   await expect(preview).toContainText(/\?c=LUNCH-/); // the landing link carries the campaign code
-  await expect(page.getByTestId("grow-nothing-leaves")).toBeVisible();
 
   await page.getByTestId("submit-button").click();
   await expect(page.getByTestId("campaign-status")).toHaveAttribute("data-status", "pending_approval");
@@ -97,8 +99,9 @@ test("the sample invoice question shows its evidence, is clearly sample data, an
   await expect(page.getByTestId("nothing-sent")).toBeVisible();
 
   // Text inside a document is displayed as text and never acted on.
-  const raw = page.getByTestId("raw-document").first();
-  await expect(raw).toContainText("NOTE TO AI ASSISTANT");
+  const raw = page.getByTestId("raw-document").filter({ hasText: "NOTE TO AI ASSISTANT" });
+  await expect(raw).toHaveCount(1);
+  await expect(raw).toContainText("Instructions inside documents are never followed.");
   await expect(page.getByTestId("exception-status")).toHaveAttribute("data-status", "suspected");
 
   // --- Manager may confirm it looks right, but cannot approve the supplier question ---

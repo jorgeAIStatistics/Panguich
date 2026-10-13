@@ -1,5 +1,5 @@
 // Measures real page-load numbers from the running app in headless Chromium.
-// Emulates a mid-range phone: 4x CPU slowdown and a "slow 4G" connection.
+// Emulates a mid-range phone: 4x CPU slowdown and download speed capped at 1.6 Mbps.
 // Usage: node scripts/measure.mjs <baseUrl> [path ...]
 //
 // These are lab measurements from one machine, not Lighthouse scores and not field data.
@@ -65,4 +65,6 @@ for (const target of targets) {
 }
 await browser.close();
 console.table(rows);
-console.log("Lab conditions: Pixel 7 viewport, 4x CPU slowdown, 1.6 Mbps down / 150 ms latency, cold cache, headless Chromium.");
+console.log("Lab conditions: Pixel 7 viewport, 4x CPU slowdown, download capped at 1.6 Mbps, cold cache, headless Chromium,");
+console.log("server on the same machine. The requested 150 ms latency does not show up in TTFB against localhost, so");
+console.log("real-network first-byte time will be higher. Photo slots are placeholders; real photos will add weight.");

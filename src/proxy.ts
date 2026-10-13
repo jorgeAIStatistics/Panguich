@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isLocale, LOCALE_COOKIE, localeFromAcceptLanguage, type Locale } from "@/lib/i18n";
+import { isLocale, isRealPageVisit, LOCALE_COOKIE, localeFromAcceptLanguage, type Locale } from "@/lib/i18n";
 
 const PUBLIC_PAGES = new Set(["/", "/menu", "/catering", "/visit"]);
 const ONE_YEAR = 60 * 60 * 24 * 365;
@@ -8,7 +8,7 @@ const ONE_YEAR = 60 * 60 * 24 * 365;
  * Language routing for the public website.
  *  - "/" and un-prefixed pages (e.g. a campaign link to /menu?c=CODE) go to the visitor's
  *    language, keeping the query string.
- *  - Visiting /en/... or /es/... remembers that choice.
+ *  - Opening /en/... or /es/... remembers that choice. Background prefetches do not count.
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -16,7 +16,7 @@ export function proxy(request: NextRequest) {
 
   if (isLocale(first)) {
     const response = NextResponse.next();
-    if (request.cookies.get(LOCALE_COOKIE)?.value !== first) {
+    if (isRealPageVisit(request.headers) && request.cookies.get(LOCALE_COOKIE)?.value !== first) {
       response.cookies.set(LOCALE_COOKIE, first, { path: "/", maxAge: ONE_YEAR, sameSite: "lax" });
     }
     return response;
