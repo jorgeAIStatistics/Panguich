@@ -7,6 +7,21 @@
  * is a labeled placeholder until the owner approves real photos.
  */
 
+/*
+ * Keep focused or scrolled-to elements clear of the sticky header and the phone action bar,
+ * so a button reached with the keyboard is never hidden underneath them.
+ */
+html {
+  scroll-padding-top: 76px;
+  scroll-padding-bottom: 88px;
+}
+@media (min-width: 820px) {
+  html {
+    scroll-padding-top: 88px;
+    scroll-padding-bottom: 0;
+  }
+}
+
 .s-page {
   min-height: 100dvh;
   display: flex;

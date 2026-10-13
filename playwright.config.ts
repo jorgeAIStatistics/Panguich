@@ -14,8 +14,8 @@ export default defineConfig({
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
   ],
   webServer: {
-    // Runs the production build against a throwaway demo database.
-    command: `npm run build && npx next start -p ${PORT}`,
+    // Runs the production build against a throwaway demo database, recreated on every run.
+    command: `rm -rf .data/e2e && npm run build && npx next start -p ${PORT}`,
     url: `http://localhost:${PORT}/en`,
     timeout: 240_000,
     reuseExistingServer: false,
@@ -23,6 +23,8 @@ export default defineConfig({
       PANGUICH_DEMO_MODE: "1",
       PANGUICH_DATA_DIR: ".data/e2e",
       PANGUICH_SITE_URL: `http://localhost:${PORT}`,
+      // The public form allows 5 saved requests per 10 minutes per address; tests need more.
+      PANGUICH_CATERING_FORM_LIMIT: "100",
     },
   },
 });

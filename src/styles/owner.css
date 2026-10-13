@@ -4,6 +4,17 @@
  * is truly specific to that page.
  */
 
+/* Keep focused elements clear of the top bar and the phone tab bar. */
+html {
+  scroll-padding-top: 72px;
+  scroll-padding-bottom: 84px;
+}
+@media (min-width: 960px) {
+  html {
+    scroll-padding-bottom: 0;
+  }
+}
+
 .o-app {
   min-height: 100dvh;
   display: flex;

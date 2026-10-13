@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { eq } from "drizzle-orm";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { dataDir, getDb } from "@/db/client";
 import { users } from "@/db/schema";
@@ -79,10 +79,13 @@ export function toActor(user: SessionUser): NonNullable<Actor> {
 export async function startSession(userId: string): Promise<void> {
   const exp = Math.floor(Date.now() / 1000) + SESSION_HOURS * 3600;
   const token = signSession({ uid: userId, exp }, await sessionSecret());
+  // Mark the cookie Secure whenever the request arrived over HTTPS (directly or via a proxy).
+  // A local demo on http://localhost or a LAN address keeps working in every browser.
+  const overHttps = (await headers()).get("x-forwarded-proto")?.split(",")[0]?.trim() === "https";
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production" && process.env.PANGUICH_INSECURE_COOKIES !== "1",
+    secure: overHttps,
     path: "/",
     maxAge: SESSION_HOURS * 3600,
   });

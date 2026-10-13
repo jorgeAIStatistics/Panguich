@@ -9,11 +9,13 @@ export type Db = PgliteDatabase<typeof schema>;
 /** A database handle or an open transaction. Service functions accept either. */
 export type DbOrTx = Db | Parameters<Parameters<Db["transaction"]>[0]>[0];
 
-export const MIGRATIONS_DIR = path.join(process.cwd(), "drizzle");
+export const MIGRATIONS_DIR = path.join(/* turbopackIgnore: true */ process.cwd(), "drizzle");
 
 export function dataDir(): string {
   const configured = process.env.PANGUICH_DATA_DIR;
-  return configured ? path.resolve(process.cwd(), configured) : path.join(process.cwd(), ".data", "pglite");
+  return configured
+    ? path.resolve(/* turbopackIgnore: true */ process.cwd(), configured)
+    : path.join(/* turbopackIgnore: true */ process.cwd(), ".data", "pglite");
 }
 
 // One embedded Postgres per server process, shared across hot reloads.
